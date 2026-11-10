@@ -1,0 +1,102 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Add a tank",
+        "description": "Choose the starter plan for this tank. Add Aquarium Feeding Planner again to set up another tank.",
+        "data": {
+          "name": "Tank name",
+          "preset": "Starter plan"
+        }
+      }
+    },
+    "error": {
+      "invalid_name": "Enter a tank name that can be used as an entity ID."
+    },
+    "abort": {
+      "already_configured": "A feeding plan already exists for this tank name."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Feeding plan",
+        "menu_options": {
+          "edit_portion": "Edit a food or portion",
+          "add_portion": "Add a food or portion",
+          "remove_portion": "Remove a food or portion",
+          "set_week_a": "Set the first Monday of Week A",
+          "manage_foods": "Manage foods and purchase links"
+        }
+      },
+      "edit_portion": {
+        "title": "Choose a portion to edit",
+        "data": {
+          "portion": "Food and serving"
+        }
+      },
+      "remove_portion": {
+        "title": "Choose a portion to remove",
+        "description": "Submitting removes this portion from the schedule.",
+        "data": {
+          "portion": "Food and serving"
+        }
+      },
+      "portion": {
+        "title": "Food and portion",
+        "description": "Select a food from your catalogue. Choose the days and dry weight for this serving. Set grams to 0 to pause it.",
+        "data": {
+          "grams": "Dry weight",
+          "weekly_days": "Days every week",
+          "alternate_days": "Extra days every other week",
+          "alternate_week": "Week for extra days",
+          "note": "Serving note",
+          "food_id": "Food",
+          "recipient": "Who gets this food"
+        }
+      },
+      "set_week_a": {
+        "title": "Set the first Monday of Week A",
+        "description": "Choose any Monday in the week when you want the Week A meals to apply.",
+        "data": {
+          "week_a": "Week A starts on"
+        }
+      },
+      "manage_foods": {
+        "title": "Food catalogue",
+        "description": "This list is shared by all feeding plans.",
+        "menu_options": {
+          "add_food": "Add a food",
+          "edit_food": "Edit a food or purchase link"
+        }
+      },
+      "edit_food": {
+        "title": "Choose a food to edit",
+        "data": {
+          "food_id": "Food"
+        }
+      },
+      "food": {
+        "title": "Food details",
+        "description": "Changes to the food name or purchase link apply to all schedules that use it.",
+        "data": {
+          "name": "Food name",
+          "url": "Purchase website (optional)"
+        }
+      }
+    },
+    "error": {
+      "missing_days": "Choose at least one feeding day.",
+      "overlapping_days": "A day can be weekly or alternating for this portion. Choose one.",
+      "not_monday": "Choose a Monday.",
+      "invalid_food_name": "Enter a name for this food.",
+      "invalid_url": "Enter a website link starting with https:// or http://, or leave it blank.",
+      "duplicate_food": "A food with that name already exists.",
+      "food_missing": "Choose a food from the list."
+    },
+    "abort": {
+      "portion_missing": "This portion is no longer available.",
+      "food_missing": "This food is no longer available."
+    }
+  }
+}

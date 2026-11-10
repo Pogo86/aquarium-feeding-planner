@@ -1,0 +1,14 @@
+{
+  "domain": "aquarium_feeding_planner",
+  "name": "Aquarium Feeding Planner",
+  "codeowners": [
+    "@Pogo86"
+  ],
+  "config_flow": true,
+  "documentation": "https://github.com/Pogo86/aquarium-feeding-planner#readme",
+  "integration_type": "service",
+  "iot_class": "calculated",
+  "requirements": [],
+  "version": "0.2.0",
+  "issue_tracker": "https://github.com/Pogo86/aquarium-feeding-planner/issues"
+}

@@ -1,0 +1,36 @@
+alias: Aquarium feeding reminder
+variables:
+  main_plan: sensor.main_tank_feeding_plan
+  shrimp_plan: sensor.cherry_shrimp_feeding_plan
+triggers:
+  - trigger: time_pattern
+    minutes: "*"
+conditions:
+  - condition: time
+    after: "18:00:00"
+  - condition: state
+    entity_id: person.your_person
+    state: "home"
+    for: "00:30:00"
+  - condition: template
+    value_template: >-
+      {{ is_state(main_plan, 'due') or is_state(shrimp_plan, 'due') }}
+  - condition: template
+    value_template: >-
+      {% set last = this.attributes.last_triggered | default(none) %}
+      {{ last is none or as_local(last).date() != now().date() }}
+actions:
+  - action: notify.mobile_app_your_phone
+    data:
+      title: "Aquarium feeding · {{ now().strftime('%A') }}"
+      message: |-
+        {% if is_state(main_plan, 'due') -%}
+        Main tank
+        {{ state_attr(main_plan, 'meal') }}
+        {% endif -%}
+        {% if is_state(shrimp_plan, 'due') -%}
+        Cherry shrimp tank
+        {{ state_attr(shrimp_plan, 'meal') }}
+        {% endif -%}
+mode: single
+
