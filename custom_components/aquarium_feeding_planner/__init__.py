@@ -1,10 +1,14 @@
 """Standalone, local aquarium feeding schedules."""
 from asyncio import Lock
 from datetime import date, datetime
+from pathlib import Path
 
+from homeassistant.components import websocket_api
+from homeassistant.components.http import StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.typing import ConfigType
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers.storage import Store
@@ -12,6 +16,7 @@ from homeassistant.util import dt as dt_util
 
 from .catalogue import FoodCatalogue, async_get_catalogue
 from .plan import DEFAULT_WEEK_A, DOMAIN, PRESETS
+from .schedule_api import websocket_save_day
 
 PLATFORMS = (Platform.SENSOR, Platform.BUTTON)
 
@@ -26,7 +31,7 @@ class TankPlan:
         self.week_a = date.fromisoformat(entry.options.get("week_a", DEFAULT_WEEK_A))
         self.store = _feeding_store(hass, entry)
         self.last_fed: datetime | None = None
-        self.signal = f"{DOMAIN}_{entry.entry_id}_fed"
+        self.signal = f"{DOMAIN}_{entry.entry_id}_updated"
         self.device_info = DeviceInfo(identifiers={(DOMAIN, entry.entry_id)}, name=entry.title)
         self._lock = Lock()
 
@@ -51,6 +56,19 @@ def _feeding_store(hass: HomeAssistant, entry: ConfigEntry) -> Store:
     return Store(hass, 1, f"{DOMAIN}.{entry.entry_id}")
 
 
+async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
+    """Register the local dashboard resource and schedule editor."""
+    await hass.http.async_register_static_paths([
+        StaticPathConfig(
+            f"/{DOMAIN}/card.js",
+            str(Path(__file__).parent / "www" / "card.js"),
+            False,
+        )
+    ])
+    websocket_api.async_register_command(hass, websocket_save_day)
+    return True
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry[TankPlan]) -> bool:
     """Set up a feeding plan from the UI."""
     catalogue = await async_get_catalogue(hass)
@@ -70,6 +88,7 @@ async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry[TankPlan]) 
     """Remove the tank's feeding record when the entry is deleted."""
     await _feeding_store(hass, entry).async_remove()
 
+
 async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry[TankPlan]) -> bool:
     """Convert v0.1 schedule rows to catalogue references."""
     if entry.version != 1:
@@ -82,4 +101,3 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry[TankPlan])
         options["portions"] = await catalogue.async_link_legacy_portions(options["portions"])
     hass.config_entries.async_update_entry(entry, minor_version=2, options=options)
     return True
-

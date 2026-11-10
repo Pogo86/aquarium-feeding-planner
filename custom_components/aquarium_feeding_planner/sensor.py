@@ -11,7 +11,7 @@ from homeassistant.util import dt as dt_util
 
 from . import TankPlan
 from .catalogue import FOODS_CHANGED
-from .plan import format_meal, portions_for
+from .plan import format_meal, portions_for, rotation_week, schedule_by_day, schedule_revision
 
 
 async def async_setup_entry(
@@ -27,11 +27,14 @@ class FeedingPlanSensor(SensorEntity):
     _attr_name = "Feeding plan"
     _attr_icon = "mdi:fish"
     _attr_should_poll = False
-    _unrecorded_attributes = frozenset({"food_catalogue"})
+    _unrecorded_attributes = frozenset({
+        "food_catalogue", "week_schedule", "schedule_revision", "plan_entry_id", "tank_name"
+    })
 
     def __init__(self, entry: ConfigEntry[TankPlan]) -> None:
         super().__init__()
         self._plan = entry.runtime_data
+        self._entry = entry
         self._attr_unique_id = f"{entry.entry_id}_feeding_plan"
         self._attr_device_info = self._plan.device_info
         self._refresh()
@@ -60,7 +63,15 @@ class FeedingPlanSensor(SensorEntity):
         foods = self._plan.catalogue.foods
         self._attr_extra_state_attributes = {
             "meal": format_meal(portions, foods),
-            "food_catalogue": sorted(foods.values(), key=lambda food: food["name"].casefold()),
+            "food_catalogue": [
+                {"id": key, **food}
+                for key, food in sorted(foods.items(), key=lambda item: item[1]["name"].casefold())
+            ],
+            "week_schedule": schedule_by_day(self._plan.portions),
+            "schedule_revision": schedule_revision(self._plan.portions),
+            "plan_entry_id": self._entry.entry_id,
+            "tank_name": self._entry.title,
+            "current_week": rotation_week(today, self._plan.week_a),
+            "current_weekday": today.weekday(),
             "last_fed": last_fed.isoformat() if last_fed else None,
         }
-
